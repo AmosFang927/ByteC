@@ -1,0 +1,131 @@
+{
+  "name": "Weekly Report Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "custom",
+              "cronExpression": "0 9 * * 1"
+            }
+          ]
+        }
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "url": "https://open.feishu.cn/open-apis/bitable/v1/apps/{{AppToken}}/tables/{{TableId}}/records",
+        "options": {
+          "qs": {
+            "page_size": 500
+          },
+          "fullResponse": false
+        },
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{AccessToken}}"
+            }
+          ]
+        }
+      },
+      "name": "Read Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const rows = items[0].json.data.records;\nconst filtered = rows.map(r => {\n  return {\n    'Sale Amount': parseFloat(r.fields['Sale Amount']) * 0.9,\n    'Conversion': parseFloat(r.fields['Conversion']) * 0.9\n  };\n});\nreturn [{ json: filtered }];"
+      },
+      "name": "Process Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "console.log('Processed data:', items[0].json); return items;"
+      },
+      "name": "Log Output",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "accessToken",
+        "requestMethod": "POST",
+        "url": "https://open.feishu.cn/open-apis/bitable/v1/apps/{{AppToken}}/tables/{{TableId}}/records",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "{{$json}}",
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{AccessToken}}"
+            }
+          ]
+        }
+      },
+      "name": "Write Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Cron": {
+      "main": [
+        [
+          {
+            "node": "Read Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheet": {
+      "main": [
+        [
+          {
+            "node": "Process Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Data": {
+      "main": [
+        [
+          {
+            "node": "Log Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Output": {
+      "main": [
+        [
+          {
+            "node": "Write Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
