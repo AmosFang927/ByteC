@@ -1,0 +1,12 @@
+﻿{
+    "version":  "2.1.0",
+    "license":  "MIT",
+    "name":  "playwright-browser-skill",
+    "type":  "module",
+    "description":  "A powerful browser automation skill for OpenClaw",
+    "engines":  {
+                    "node":  "\u003e=18.0.0"
+                },
+    "author":  "91fapiao \u003c91fapiao@gmail.com\u003e",
+    "main":  "dist/index.js"
+}
