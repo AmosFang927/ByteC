@@ -1,0 +1,59 @@
+name: ByteC DSP CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Test (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    defaults:
+      run:
+        working-directory: bytec-dsp
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Run tests with coverage
+        run: pytest --cov=. --cov-report=term-missing --cov-fail-under=70
+
+  services-health-check:
+    name: Service import check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bytec-dsp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install fastapi pydantic uvicorn httpx redis asyncpg
+      - name: Import all services
+        run: |
+          python -c "from services.rtb_engine.main import app; print('rtb_engine ok')"
+          python -c "from services.campaign_mgmt.main import app; print('campaign_mgmt ok')"
+          python -c "from services.ml_serving.main import app; print('ml_serving ok')"
+          python -c "from services.budget_pacer.main import app; print('budget_pacer ok')"
+          python -c "from services.attribution.main import app; print('attribution ok')"
+          python -c "from services.analytics.main import app; print('analytics ok')"
