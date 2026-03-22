@@ -1,0 +1,24 @@
+﻿{
+    "mcpServers":  {
+                       "playwright-browser":  {
+                                                  "args":  [
+                                                               "../../dist/mcp-server.js"
+                                                           ],
+                                                  "env":  {
+
+                                                          },
+                                                  "command":  "node",
+                                                  "autoApprove":  [
+                                                                      "browser_launch",
+                                                                      "browser_goto",
+                                                                      "browser_get_title",
+                                                                      "browser_get_text",
+                                                                      "browser_get_html",
+                                                                      "browser_get_links",
+                                                                      "browser_get_cookies",
+                                                                      "browser_close"
+                                                                  ],
+                                                  "disabled":  false
+                                              }
+                   }
+}
